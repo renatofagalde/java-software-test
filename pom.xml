@@ -59,6 +59,10 @@
             <artifactId>javafaker</artifactId>
             <version>0.12</version>
         </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-commons</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

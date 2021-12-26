@@ -20,6 +20,7 @@ public class Payment {
     @Id
     @GeneratedValue
     private Long paymentUId;
+    @Setter
     private UUID customerId;
     private BigDecimal amount;
     private Currency currency;

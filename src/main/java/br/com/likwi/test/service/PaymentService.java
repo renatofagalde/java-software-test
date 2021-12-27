@@ -35,7 +35,7 @@ public class PaymentService {
         this.cardPaymentCharger = cardPaymentCharger;
     }
 
-    void chargeCard(UUID customerId,
+    public void chargeCard(UUID customerId,
                     PaymentRequest paymentRequest) {
         //1# Does customer exists, if not throw
         final Customer customer = this.customerRepository.findById(customerId).orElseThrow(() -> {

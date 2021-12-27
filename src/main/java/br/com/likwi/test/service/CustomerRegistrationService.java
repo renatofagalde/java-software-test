@@ -10,12 +10,12 @@ import java.text.MessageFormat;
 import java.util.Optional;
 
 @Service
-public class CustumerRegistrationService {
+public class CustomerRegistrationService {
 
     private final CustomerRepository customerRepository;
 
     @Autowired
-    public CustumerRegistrationService(CustomerRepository customerRepository) {
+    public CustomerRegistrationService(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
 

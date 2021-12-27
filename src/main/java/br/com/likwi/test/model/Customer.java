@@ -1,5 +1,6 @@
 package br.com.likwi.test.model;
 
+import br.com.likwi.test.Util;
 import lombok.*;
 
 import javax.persistence.*;
@@ -10,10 +11,10 @@ import java.util.logging.Logger;
 
 /**
  * Remember: to use @NotBlank in test, you need this set:
- * @DataJpaTest(
- *         properties = {
- *                 "spring.jpa.properties.javax.persistence.validation.mode=none"
- *         }
+ *
+ * @DataJpaTest( properties = {
+ * "spring.jpa.properties.javax.persistence.validation.mode=none"
+ * }
  * )
  */
 
@@ -23,12 +24,12 @@ import java.util.logging.Logger;
 @ToString
 @Entity
 @Builder
+@EqualsAndHashCode
 public class Customer {
 
     final static Logger logger = Logger.getLogger(Customer.class.toString());
 
     @Id
-    @NotBlank
     private UUID id;
 
     @NotBlank
@@ -45,6 +46,9 @@ public class Customer {
 
         logger.info(MessageFormat.format("Object Customer new ID {0}",
                 this.id));
+        logger.info(MessageFormat.format("Object Customer  {0}",
+                Util.objectToJson(this)));
+        logger.info("\t");
     }
 
     @PostLoad
@@ -52,6 +56,4 @@ public class Customer {
         logger.info(MessageFormat.format("Object Customer load {0}",
                 this.id));
     }
-
-
 }

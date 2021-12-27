@@ -3,6 +3,7 @@ package br.com.likwi.test.service;
 import br.com.likwi.test.bean.CustomerRegistrationRequest;
 import br.com.likwi.test.dao.CustomerRepository;
 import br.com.likwi.test.model.Customer;
+import br.com.likwi.test.validator.PhoneNumberValidator;
 import com.github.javafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
-class CustumerRegistrationServiceTest {
+class CustomerRegistrationServiceTest {
 
     //#1
     //old school, I prefer with annotations
@@ -36,10 +37,13 @@ class CustumerRegistrationServiceTest {
     @Mock
     private CustomerRepository customerRepository;
 
+    @Mock
+    private PhoneNumberValidator phoneNumberValidator;
+
     @Captor
     private ArgumentCaptor<Customer> customerArgumentCaptor;
 
-    private CustumerRegistrationService underTest;
+    private CustomerRegistrationService underTest;
     private Customer customer_1;
     private Customer customer_2;
     private final Faker faker = new Faker();
@@ -48,13 +52,15 @@ class CustumerRegistrationServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        this.underTest = new CustumerRegistrationService(customerRepository);
+        this.underTest = new CustomerRegistrationService(customerRepository, phoneNumberValidator);
 
         customer_1 = Customer.builder()
                 .id(null)
                 .name(this.faker.name().fullName())
-                .phoneNumber(this.faker.phoneNumber().phoneNumber())
+                .phoneNumber(this.faker.phoneNumber().cellPhone())
                 .build();
+
+        System.out.println("customer_1.getPhoneNumber() = " + customer_1.getPhoneNumber());
     }
 
     @Test
@@ -67,6 +73,7 @@ class CustumerRegistrationServiceTest {
 
         // no customer with phone number pass
         given(customerRepository.selectCustomerByPhoneNumber(phoneNumber)).willReturn(Optional.empty());
+        given(phoneNumberValidator.test(phoneNumber)).willReturn(true);
 
         //When
         underTest.registerNewCustomer(registrationRequest);
@@ -94,6 +101,7 @@ class CustumerRegistrationServiceTest {
         given(customerRepository.selectCustomerByPhoneNumber(
                 this.customer_1.getPhoneNumber()))
                 .willReturn(Optional.empty());
+        given(phoneNumberValidator.test(customer_1.getPhoneNumber())).willReturn(true);
 
         //When
         underTest.registerNewCustomer(registrationRequest);
@@ -117,6 +125,7 @@ class CustumerRegistrationServiceTest {
         given(customerRepository
                 .selectCustomerByPhoneNumber(phoneNumber))
                 .willReturn(Optional.of(customer_1));
+        given(phoneNumberValidator.test(phoneNumber)).willReturn(true);
         //When
         underTest.registerNewCustomer(registrationRequest);
 
@@ -144,6 +153,7 @@ class CustumerRegistrationServiceTest {
         given(customerRepository
                 .selectCustomerByPhoneNumber(phoneNumberCustumer_1))
                 .willReturn(Optional.of(customer_2));
+        given(phoneNumberValidator.test(phoneNumberCustumer_1)).willReturn(true);
 
         //When
         //Then
@@ -158,4 +168,27 @@ class CustumerRegistrationServiceTest {
                 .save(any(Customer.class));
 
     }
+
+    @Test
+    void itShouldNotSaveNewCustomerWhenPhoneNumberIsInvalid() {
+        //Given
+        final String phoneNumber = this.customer_1.getPhoneNumber();
+
+        //request
+        CustomerRegistrationRequest registrationRequest = new CustomerRegistrationRequest(customer_1);
+
+        // no customer with phone number pass
+        given(customerRepository.selectCustomerByPhoneNumber(phoneNumber)).willReturn(Optional.empty());
+        given(phoneNumberValidator.test(phoneNumber)).willReturn(false);
+
+        //When
+        assertThatThrownBy(() -> underTest.registerNewCustomer(registrationRequest))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Phone number " + phoneNumber + " is not valid");
+
+
+        //Then
+        then(this.customerRepository).shouldHaveNoInteractions();
+    }
+
 }

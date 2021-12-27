@@ -3,6 +3,7 @@ package br.com.likwi.test.service;
 import br.com.likwi.test.bean.CustomerRegistrationRequest;
 import br.com.likwi.test.dao.CustomerRepository;
 import br.com.likwi.test.model.Customer;
+import br.com.likwi.test.validator.PhoneNumberValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +14,21 @@ import java.util.Optional;
 public class CustomerRegistrationService {
 
     private final CustomerRepository customerRepository;
+    private final PhoneNumberValidator phoneNumberValidator;
 
     @Autowired
-    public CustomerRegistrationService(CustomerRepository customerRepository) {
+    public CustomerRegistrationService(CustomerRepository customerRepository, PhoneNumberValidator phoneNumberValidator) {
         this.customerRepository = customerRepository;
+        this.phoneNumberValidator = phoneNumberValidator;
     }
 
     public void registerNewCustomer(CustomerRegistrationRequest request) {
+
+        final String phoneNumber = request.getCustomer().getPhoneNumber();
+        if (!this.phoneNumberValidator.test(phoneNumber)) {
+            throw new IllegalStateException("Phone number " + phoneNumber + " is not valid");
+        }
+
         //#1 phoneNumber is taken
         final Optional<Customer> optionalCustomer = this.customerRepository
                 .selectCustomerByPhoneNumber(request.getCustomer().getPhoneNumber());

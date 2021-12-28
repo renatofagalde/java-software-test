@@ -10,6 +10,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <name>likwi-software-test</name>
+    <url>https://likwi.com.br</url>
+
     <groupId>br.com.likwi</groupId>
     <artifactId>likwi-software-test</artifactId>
     <version>1.0-SNAPSHOT</version>
